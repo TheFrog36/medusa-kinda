@@ -65,17 +65,17 @@ function gameLoop() {
   setInterval(() => {
     update();
     render();
-  }, 30);
+  }, 17);
 }
 
 function update() {
   body[0].point = mousePosition
 
-  for(let i = 1; i < body.length; i++){
-    const newPosition = moveTowards(body[i].point, body[i-1].point, baseSegmentLength, body[i].direction) // P1 to P2
-    body[i].direction = {x: newPosition.x - body[i].point.x, y: newPosition.y - body[i].point.y}
-    body[i].point = newPosition
-  }
+  // for(let i = 1; i < body.length; i++){
+  //   const newPosition = moveTowards(body[i].point, body[i-1].point, baseSegmentLength, body[i].direction) // P1 to P2
+  //   body[i].direction = {x: newPosition.x - body[i].point.x, y: newPosition.y - body[i].point.y}
+  //   body[i].point = newPosition
+  // }
 }
 
 function render() {
