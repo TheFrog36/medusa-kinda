@@ -82,3 +82,13 @@ export function sumVector(v1, v2){
         y: v1.y + v2.y
     }
 }
+export function getVectorAngleDifference(angle1, angle2) {
+    // return  Math.PI - Math.abs(Math.abs(angle1 - angle2) - Math.PI)
+    const twoPi = Math.PI * 2;
+    angle1 = angle1 % twoPi;
+    angle2 = angle2 % twoPi;
+    let diff = angle1 - angle2;
+    // diff = (diff + Math.PI) % twoPi - Math.PI;
+    diff = (diff + twoPi + Math.PI) % twoPi - Math.PI;
+    return diff;
+}

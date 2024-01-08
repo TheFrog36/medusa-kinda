@@ -45,3 +45,4 @@ export function clearCanvas(ctx, color = undefined){
     }
 }
 
+

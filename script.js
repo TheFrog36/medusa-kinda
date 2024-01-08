@@ -13,18 +13,20 @@ let mousePosition = {
 }
 
 const jointRadius = 2;
-const bodySegments = 20;
-const baseSegmentLength = 10;
-const tailSegments = 15;
+const bodySegments = 1;
+const baseSegmentLength = 80;
+const tailSegments = 0;
 const tailGrowthRate = 1.15;
 
 const creatureColor = "white";
-const maxTurnAngle = MyMath.degToRad(3);
+const maxTurnAngle = MyMath.degToRad(5);
 const pushInterval = 2; // boh
 const pushForce = 10; // boh
-let speed = baseSegmentLength / 4; // boh
-
+let speed = baseSegmentLength / 300; // boh
+let frameLength = 17
 const body = [];
+
+let gameLoopIntervalId
 
 resizeCanvas();
 canvas.addEventListener("mousemove", function (event) {
@@ -33,40 +35,46 @@ canvas.addEventListener("mousemove", function (event) {
 Draw.clearCanvas(ctx, "black")
 generateCreature()
 
-gameLoop()
+startGameLoop(frameLength)
 
-
-function gameLoop(){
-	setInterval(()=>{
+function gameLoop(frameLength){
+	return setInterval(()=>{
 		update()
 		render()
-	}, 17)
+	}, frameLength)
 }
 
 function update(){
-	moveHead()
-	for(let i = 1; i < body.length; i++){
-		const p1 = body[i].pos
-		const p2 = body[i-1].pos
+	// moveHead()
+	// for(let i = 1; i < body.length; i++){
+	// 	const p1 = body[i].pos
+	// 	const p2 = body[i-1].pos
 
-		const distance = MyMath.getDistanceBetweenPoints(p1, p2)
-		const intersection = moveTowards(p1, p2, maxTurnAngle, body[i].direction, baseSegmentLength)
-		body[i].pos = intersection.newPosition
-		body[i].direction = intersection.newDirection
+	// 	const distance = MyMath.getDistanceBetweenPoints(p1, p2)
+	// 	const intersection = moveTowards(p1, p2, maxTurnAngle, body[i].direction, baseSegmentLength)
+	// 	body[i].pos = intersection.newPosition
+	// 	body[i].direction = intersection.newDirection
 	
-	}
+	// }
 }
 
 function render(){
 	Draw.clearCanvas(ctx, canvasColor)
+	moveHead()
+	// for(let i = 1; i < body.length; i++){
+	// 	const p1 = body[i].pos
+	// 	const p2 = body[i-1].pos
+	// 	const intersection = moveTowards(p1, p2, maxTurnAngle, body[i].direction, baseSegmentLength)
+	// 	// body[i].pos = intersection.newPosition
+	// 	// body[i].direction = intersection.newDirection
+	
+	// }
 
-
-	// moveTowards(body[0].pos, mousePosition, maxTurnAngle, body[0].direction, baseSegmentLength)
-	for(let i = 0; i < body.length; i++){
-		Draw.drawCircle(ctx, body[i].pos, jointRadius, creatureColor, true, 1)
-		if(i == 0) continue
-		Draw.drawSegmentBetweenPoints(ctx, body[i].pos, body[i-1].pos, 1, creatureColor)
-	}
+	// for(let i = 0; i < body.length; i++){
+	// 	Draw.drawCircle(ctx, body[i].pos, jointRadius, creatureColor, true, 1)
+	// 	if(i == 0) continue
+	// 	Draw.drawSegmentBetweenPoints(ctx, body[i].pos, body[i-1].pos, 1, creatureColor)
+	// }
 }
 
 
@@ -127,46 +135,108 @@ function getRelativeCanvasPosition(canvas, event) {
 	return { x, y };
 }
 
+// function moveTowards(p1, p2, maxAngle, currentDirection, distance){
+
+// 	Draw.drawCircle(ctx, p1, 3, "white")
+// 	Draw.drawCircle(ctx, p2, 3, "cyan")
+// 	Draw.drawCircle(ctx, p2, distance, "cyan", false, 1)
+// 	Draw.drawSegmentWithAngle(ctx, p1, currentDirection, 5000, 1, "red")
+// 	const targetVector = MyMath.getVectorFromPoints(p1, p2)
+// 	let targetAngle //= MyMath.getVectorAngle(targetVector)
+// 	targetAngle =  MyMath.angleBetweenPoints(MyMath.getNormalizedVectorFromAngle(currentDirection), targetVector) + currentDirection
+
+// 	const angleDiff = currentDirection - targetAngle
+// 	if(Math.abs(angleDiff) > maxAngle) {
+// 		console.log("OVER")
+// 		targetAngle = currentDirection - (maxAngle) * (angleDiff > 0 ? 1 : -1)
+// 	}
+// 	Draw.drawSegmentWithAngle(ctx, p1, targetAngle, 5000, "red")
+
+// 	Draw.drawSegmentWithAngle(ctx, p1, targetAngle, 5000, 1, "red")
+// 	const slope = Math.sin(targetAngle) / Math.cos(targetAngle)
+// 	let vector = MyMath.findClosestIntersectionSlopeCircle(slope, targetVector, distance)
+// 	if(!vector) {
+// 		frameLength = 500
+// 		// changeGameFrames(500)
+// 		let targetDistance = MyMath.getDistanceBetweenPoints(p1, p2) //- distance
+// 		if(targetDistance > distance) targetDistance = distance
+// 		console.log(targetDistance)
+// 		vector = MyMath.multiplyVector(MyMath.getNormalizedVectorFromAngle(targetAngle),  targetDistance)
+// 	}
+// 	const newPosition = MyMath.sumVector(p1, vector)
+// 	// Draw.drawCircle(ctx, MyMath.sumVector(p1, vector), 3, "yellow")
+// 	return {newPosition, newDirection: targetAngle}
+// 	// return newPosition & new directio  
+// }
+
 function moveTowards(p1, p2, maxAngle, currentDirection, distance){
 
-	// Draw.drawCircle(ctx, p1, 3, "white")
-	// Draw.drawCircle(ctx, p2, 3, "cyan")
-	// Draw.drawCircle(ctx, p2, distance, "cyan", false, 1)
-	// Draw.drawSegmentWithAngle(ctx, p1, currentDirection, 5000, 1, "red")
+	Draw.drawCircle(ctx, p1, 3, "white")
+	Draw.drawCircle(ctx, p2, 3, "cyan")
+	Draw.drawCircle(ctx, p2, distance, "cyan", false, 1)
+	Draw.drawSegmentWithAngle(ctx, p1, currentDirection, 5000, 1, "red")
 	const targetVector = MyMath.getVectorFromPoints(p1, p2)
-	let targetAngle //= MyMath.getVectorAngle(targetVector)
-	targetAngle =  MyMath.angleBetweenPoints(MyMath.getNormalizedVectorFromAngle(currentDirection), targetVector) + currentDirection
-
-	const angleDiff = currentDirection - targetAngle
-	if(Math.abs(angleDiff) > maxTurnAngle) targetAngle = currentDirection - (maxTurnAngle) * (angleDiff > 0 ? 1 : -1)
+	
+	let targetAngle = MyMath.getVectorAngle(targetVector)
+	Draw.drawSegmentWithAngle(ctx, p1, targetAngle, 5000, 3, "green")
+	// const angleDiff = currentDirection - targetAngle
+	// if(Math.abs(angleDiff) > maxAngle) {
+	// 	console.log("OVER")
+	// 	targetAngle = currentDirection - (maxAngle) * (angleDiff > 0 ? 1 : -1)
+	// }
 	// Draw.drawSegmentWithAngle(ctx, p1, targetAngle, 5000, "red")
 
 	// Draw.drawSegmentWithAngle(ctx, p1, targetAngle, 5000, 1, "red")
-	const slope = Math.sin(targetAngle) / Math.cos(targetAngle)
-	let vector = MyMath.findClosestIntersectionSlopeCircle(slope, targetVector, distance)
-	if(!vector) {
-		console.log("%cDIOPORCO", "color: red; font-size: 50px")
-		const targetDistance = MyMath.getDistanceBetweenPoints(p1, p2) //- distance
-		vector = MyMath.multiplyVector(MyMath.getNormalizedVectorFromAngle(targetAngle),  targetDistance)
-	}
-	const newPosition = MyMath.sumVector(p1, vector)
+	// const slope = Math.sin(targetAngle) / Math.cos(targetAngle)
+	// vector = MyMath.findClosestIntersectionSlopeCircle(slope, targetVector, distance)
+	// if(!vector) {
+	// 	let targetDistance = MyMath.getDistanceBetweenPoints(p1, p2) //- distance
+	// 	if(targetDistance > distance) targetDistance = distance
+	// 	console.log(targetDistance)
+	// 	vector = MyMath.multiplyVector(MyMath.getNormalizedVectorFromAngle(targetAngle),  targetDistance)
+	// }
+	// const newPosition = MyMath.sumVector(p1, vector)
 	// Draw.drawCircle(ctx, MyMath.sumVector(p1, vector), 3, "yellow")
-	return {newPosition, newDirection: targetAngle}
+	// return {newPosition, newDirection: targetAngle}
 	// return newPosition & new directio  
 }
 
 function moveHead(){
 	const pos = body[0].pos
 	const direction = body[0].direction
-	const vectorToTarget = MyMath.getVectorFromPoints(pos, mousePosition)
-	// let angleToTarget = MyMath.getVectorAngle(vectorToTarget)
-	let angleToTarget =  MyMath.angleBetweenPoints(MyMath.getNormalizedVectorFromAngle(direction), vectorToTarget) + direction
-	const targetDistance = MyMath.getVectorLength(vectorToTarget)
-	const angleDiff = direction - angleToTarget
-	if(Math.abs(angleDiff) > maxTurnAngle) angleToTarget = direction - (maxTurnAngle) * (angleDiff > 0 ? 1 : -1)
-	const movementLength = speed > targetDistance ? 0 : speed
-	const movementVector = MyMath.rotateVector({x: movementLength, y: 0}, angleToTarget)
+	// const direction = Math.PI / 2
+	Draw.drawSegmentWithAngle(ctx, pos, direction, 5000, 1, "white")
+
+	const vectorToTarget = MyMath.getVectorFromPoints(pos, mousePosition)	
+	const baseAngleToTarget = MyMath.getVectorAngle(vectorToTarget)
+	const targetDistance = MyMath.getDistanceBetweenPoints(pos, mousePosition)
+	const angleDiff = MyMath.getVectorAngleDifference(baseAngleToTarget,  direction)
+	Draw.drawSegmentWithAngle(ctx, pos, baseAngleToTarget, 5000, 5, "#999")
+
+
+
+	const turnDireciton = angleDiff > 0 ? 1 : -1
+	let newDirection = (Math.abs(angleDiff) > maxTurnAngle) ? direction + maxTurnAngle * turnDireciton : baseAngleToTarget
+	console.log(newDirection)
+	Draw.drawSegmentWithAngle(ctx, pos, newDirection, 5000, 1 , "#333")
+	if(targetDistance < speed) return 
+	const movementLength = speed
+	const movementVector = MyMath.rotateVector({x: movementLength, y: 0}, newDirection)
 	const newPos = MyMath.sumVector(pos, movementVector)
 	body[0].pos = newPos
-	body[0].direction = angleToTarget
+	Draw.drawSegmentWithAngle(ctx, pos, newDirection, 5000, 1, "cyan")
+	body[0].direction = newDirection
+}
+
+function startGameLoop(frameLength){
+	gameLoopIntervalId = gameLoop(frameLength)
+}
+
+function stopGameLoop(){
+	clearInterval(gameLoopIntervalId)
+}
+
+function changeGameFrames(frameLength){
+	stopGameLoop()
+	startGameLoop(frameLength)
 }
