@@ -20,10 +20,10 @@ const tailSegments = 30;
 const tailGrowthRate = 0.92;
 
 const creatureColor = "white";
-const maxTurnAngle = MyMath.degToRad(60);
+const maxTurnAngle = MyMath.degToRad(30);
 const pushInterval = 2; // boh
 const pushForce = 10; // boh
-let speed = baseSegmentLength / 5; // boh
+const maxSpeed = 200 // pixels per second
 let frameLength = 17
 const body = [];
 
@@ -67,7 +67,7 @@ function gameLoop(timestamp) {
 }
 
 function update(delta){
-	moveHead()
+	moveHead(delta)
 	for(let i = 1; i < body.length; i++){
 		const movResult = moveTowards(body[i].pos, body[i-1].pos, body[i].direction, body[i-1].direction, maxTurnAngle, body[i].length)
 		body[i].pos = movResult.newPosition
@@ -221,7 +221,8 @@ function getRelativeCanvasPosition(canvas, event) {
 // 	// return newPosition & new directio  
 // }
 
-function moveHead(){
+function moveHead(delta){
+	const speed = maxSpeed * delta
 	const pos = body[0].pos
 	const direction = body[0].direction
 	const vectorToTarget = MyMath.getVectorFromPoints(pos, mousePosition)	
