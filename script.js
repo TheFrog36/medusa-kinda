@@ -14,7 +14,7 @@ let mousePosition = {
 
 const jointRadius = 3;
 const bodySegments = 100;
-const baseSegmentLength = 10;
+const baseSegmentLength = 20;
 const tailSegments = 0;
 const tailGrowthRate = 1.15;
 
@@ -22,7 +22,7 @@ const creatureColor = "white";
 const maxTurnAngle = MyMath.degToRad(30);
 const pushInterval = 2; // boh
 const pushForce = 10; // boh
-let speed = baseSegmentLength / 4; // boh
+let speed = baseSegmentLength / 2 ; // boh
 let frameLength = 17
 const body = [];
 
@@ -62,11 +62,10 @@ function render(){
 	Draw.clearCanvas(ctx, canvasColor)
 	// Draw.drawSegmentWithAngle(ctx, body[0].pos, body[0].direction, 5000, 1, "cyan")
 	// Draw.drawSegmentWithAngle(ctx, body[1].pos, body[1].direction, 5000, 1, "red")
-	// const movResult = moveTowards(body[1].pos, body[0].pos, body[1].direction, body[0].direction, maxTurnAngle, baseSegmentLength)
 	// body[1].pos = movResult.newPosition
 	// body[1].direction = movResult.newDirection
 	for(let i = 1; i < body.length; i++){
-		const movResult = moveTowards(body[i].pos, body[i-1].pos, body[i].direction, body[i-1].direction, maxTurnAngle * 4, baseSegmentLength)
+		const movResult = moveTowards(body[i].pos, body[i-1].pos, body[i].direction, body[i-1].direction, maxTurnAngle, baseSegmentLength)
 		body[i].pos = movResult.newPosition
 		body[i].direction = movResult.newDirection
 		
@@ -91,11 +90,16 @@ function moveTowards(p1, p2, a1, a2, maxAngle, length){
 	let newDirection
 	let newPosition
 	if(Math.abs(angleDiff) > maxAngle){
-		newDirection = a1 + maxAngle * turnDirection
-		const dum = MyMath.getNormalizedVectorFromAngle(a2)
-		const dumdum = MyMath.multiplyVector(dum, -length)
+
+		// newDirection = a1 + maxAngle * turnDirection
+		newDirection = MyMath.angleBetweenPoints(a1, a2)
+		const dum = MyMath.getNormalizedVectorFromAngle(Math.PI + a2 + maxAngle * -turnDirection)
+		// const dum = MyMath.getNormalizedVectorFromAngle(a2)
+		const dumdum = MyMath.multiplyVector(dum, length)
+		// Draw.drawSegmentWithAngle(ctx, p2, Math.PI + a2 + maxAngle * -turnDirection, 5000, 1, "red")
+		
 		newPosition = MyMath.sumVector(dumdum, p2)
-		// Draw.drawCircle(ctx, newPosition, 5, "yellowgreen")
+		// Draw.drawCircle(ctx, newPosition, 10, "yellow")
 	} else {
 		// newDirection = MyMath.angleBetweenPoints(p1, p2)
 		newDirection = MyMath.getVectorAngle(MyMath.getVectorFromPoints(p1, p2))
