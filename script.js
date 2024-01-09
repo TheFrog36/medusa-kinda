@@ -4,6 +4,7 @@ import * as Draw from "./drawFunctions.js";
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const mainContainer = document.getElementById("main-container");
+const infoContainer = document.getElementById("infos")
 // const canvasColor = "black";
 const canvasColor = "rgba(0, 0, 0, 1)"
 
@@ -37,12 +38,15 @@ generateCreature()
 
 let lastTime = 0
 let lastTimeFramesChecked = performance.now()
-console.log(lastTimeFramesChecked)
 let fps = 0;
-
+let lastFpsValue = 0
 requestAnimationFrame(gameLoop)
 
 function gameLoop(timestamp) {
+	// let c
+	// for(let i = 0; i < 100_000_000; i++){
+	// 	c = i + i / 2
+	// }
 	const deltaTime = (timestamp - lastTime) / 1000; // Convert to seconds
 	lastTime = timestamp
 	update(deltaTime)
@@ -51,14 +55,18 @@ function gameLoop(timestamp) {
 	fps++
 	if(currentTime - lastTimeFramesChecked  > 1000){
 		lastTimeFramesChecked = currentTime
-		console.log(fps)
+		lastFpsValue = fps
 		fps = 0
 	}
 	requestAnimationFrame(gameLoop);
+	updateInfo({
+		"fps": lastFpsValue,
+		"delta": deltaTime
+	})
+
 }
 
 function update(delta){
-	console.log(delta)
 	moveHead()
 	for(let i = 1; i < body.length; i++){
 		const movResult = moveTowards(body[i].pos, body[i-1].pos, body[i].direction, body[i-1].direction, maxTurnAngle, body[i].length)
@@ -193,7 +201,6 @@ function getRelativeCanvasPosition(canvas, event) {
 
 // 	const angleDiff = currentDirection - targetAngle
 // 	if(Math.abs(angleDiff) > maxAngle) {
-// 		console.log("OVER")
 // 		targetAngle = currentDirection - (maxAngle) * (angleDiff > 0 ? 1 : -1)
 // 	}
 // 	Draw.drawSegmentWithAngle(ctx, p1, targetAngle, 5000, "red")
@@ -206,7 +213,6 @@ function getRelativeCanvasPosition(canvas, event) {
 // 		// changeGameFrames(500)
 // 		let targetDistance = MyMath.getDistanceBetweenPoints(p1, p2) //- distance
 // 		if(targetDistance > distance) targetDistance = distance
-// 		console.log(targetDistance)
 // 		vector = MyMath.multiplyVector(MyMath.getNormalizedVectorFromAngle(targetAngle),  targetDistance)
 // 	}
 // 	const newPosition = MyMath.sumVector(p1, vector)
@@ -244,4 +250,15 @@ function stopGameLoop(){
 function changeGameFrames(frameLength){
 	stopGameLoop()
 	startGameLoop(frameLength)
+}
+
+function updateInfo(infos){ // [{infoName, infoValue}]
+	infoContainer.innerHTML = ""
+	for(let info in infos){
+		
+		infoContainer.innerHTML +=
+		`<tr>
+			<td>${info}</td><td>${infos[info]}</td>
+		</tr>`
+	}
 }
