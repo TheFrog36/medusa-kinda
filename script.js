@@ -12,17 +12,17 @@ let mousePosition = {
 	y: mainContainer.clientHeight / 2
 }
 
-const jointRadius = 3;
-const bodySegments = 100;
-const baseSegmentLength = 20;
-const tailSegments = 0;
-const tailGrowthRate = 1.15;
+const jointRadius = 1;
+const bodySegments = 30;
+const baseSegmentLength = 10;
+const tailSegments = 30;
+const tailGrowthRate = 0.92;
 
 const creatureColor = "white";
-const maxTurnAngle = MyMath.degToRad(30);
+const maxTurnAngle = MyMath.degToRad(60);
 const pushInterval = 2; // boh
 const pushForce = 10; // boh
-let speed = baseSegmentLength / 2 ; // boh
+let speed = baseSegmentLength / 5; // boh
 let frameLength = 17
 const body = [];
 
@@ -35,27 +35,36 @@ canvas.addEventListener("mousemove", function (event) {
 Draw.clearCanvas(ctx, "black")
 generateCreature()
 
-startGameLoop(frameLength)
+let lastTime = 0
+let lastTimeFramesChecked = performance.now()
+console.log(lastTimeFramesChecked)
+let fps = 0;
 
-function gameLoop(frameLength){
-	return setInterval(()=>{
-		update()
-		render()
-	}, frameLength)
+requestAnimationFrame(gameLoop)
+
+function gameLoop(timestamp) {
+	const deltaTime = (timestamp - lastTime) / 1000; // Convert to seconds
+	lastTime = timestamp
+	update(deltaTime)
+	render()
+	const currentTime = performance.now()
+	fps++
+	if(currentTime - lastTimeFramesChecked  > 1000){
+		lastTimeFramesChecked = currentTime
+		console.log(fps)
+		fps = 0
+	}
+	requestAnimationFrame(gameLoop);
 }
 
-function update(){
+function update(delta){
+	console.log(delta)
 	moveHead()
-	// for(let i = 1; i < body.length; i++){
-	// 	const p1 = body[i].pos
-	// 	const p2 = body[i-1].pos
-
-	// 	const distance = MyMath.getDistanceBetweenPoints(p1, p2)
-	// 	const intersection = moveTowards(p1, p2, maxTurnAngle, body[i].direction, baseSegmentLength)
-	// 	body[i].pos = intersection.newPosition
-	// 	body[i].direction = intersection.newDirection
-	
-	// }
+	for(let i = 1; i < body.length; i++){
+		const movResult = moveTowards(body[i].pos, body[i-1].pos, body[i].direction, body[i-1].direction, maxTurnAngle, body[i].length)
+		body[i].pos = movResult.newPosition
+		body[i].direction = movResult.newDirection	
+	}
 }
 
 function render(){
@@ -64,12 +73,7 @@ function render(){
 	// Draw.drawSegmentWithAngle(ctx, body[1].pos, body[1].direction, 5000, 1, "red")
 	// body[1].pos = movResult.newPosition
 	// body[1].direction = movResult.newDirection
-	for(let i = 1; i < body.length; i++){
-		const movResult = moveTowards(body[i].pos, body[i-1].pos, body[i].direction, body[i-1].direction, maxTurnAngle, baseSegmentLength)
-		body[i].pos = movResult.newPosition
-		body[i].direction = movResult.newDirection
-		
-	}
+	
 
 	for(let i = 0; i < body.length; i++){
 		Draw.drawCircle(ctx, body[i].pos, jointRadius, creatureColor, true, 1)
@@ -130,7 +134,7 @@ function generateHead() {
 			x: canvas.width / 2,
 			y: canvas.height / 2,
 		},
-		direction: 0
+		direction: 0,
 	});
 }
 
@@ -142,7 +146,8 @@ function generateBody() {
 				x: body[i].pos.x - baseSegmentLength,
 				y: body[i].pos.y,
 			},
-			direction: 0
+			direction: 0,
+			length: baseSegmentLength
 		});
 	}
 }
@@ -155,7 +160,8 @@ function generateTail() {
 				x: body.at(-1).pos.x - currentSegmentLength,
 				y: body.at(-1).pos.y,
 			},
-			direction: 0
+			direction: 0,
+			length: currentSegmentLength
 		});
 		currentSegmentLength *= tailGrowthRate;
 	}
