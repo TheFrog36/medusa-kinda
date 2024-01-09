@@ -20,10 +20,13 @@ const tailSegments = 30;
 const tailGrowthRate = 0.92;
 
 const creatureColor = "white";
-const maxTurnAngle = MyMath.degToRad(30);
+const maxTurnAngle = MyMath.degToRad(5);
 const pushInterval = 2; // boh
 const pushForce = 10; // boh
-const maxSpeed = 200 // pixels per second
+const maxSpeed = 400 // pixels per second
+const friction = maxSpeed / 1.5
+const minSpeed = 10
+let currentSpeed = 0
 let frameLength = 17
 const body = [];
 
@@ -69,7 +72,7 @@ function gameLoop(timestamp) {
 function update(delta){
 	moveHead(delta)
 	for(let i = 1; i < body.length; i++){
-		const movResult = moveTowards(body[i].pos, body[i-1].pos, body[i].direction, body[i-1].direction, maxTurnAngle, body[i].length)
+		const movResult = moveTowards(body[i].pos, body[i-1].pos, body[i].direction, body[i-1].direction, maxTurnAngle * 6, body[i].length)
 		body[i].pos = movResult.newPosition
 		body[i].direction = movResult.newDirection	
 	}
@@ -104,7 +107,7 @@ function moveTowards(p1, p2, a1, a2, maxAngle, length){
 	if(Math.abs(angleDiff) > maxAngle){
 
 		// newDirection = a1 + maxAngle * turnDirection
-		newDirection = MyMath.angleBetweenPoints(a1, a2)
+		newDirection = MyMath.angleBetweenPoints(a1, a2) + maxAngle * turnDirection
 		const dum = MyMath.getNormalizedVectorFromAngle(Math.PI + a2 + maxAngle * -turnDirection)
 		// const dum = MyMath.getNormalizedVectorFromAngle(a2)
 		const dumdum = MyMath.multiplyVector(dum, length)
@@ -222,7 +225,12 @@ function getRelativeCanvasPosition(canvas, event) {
 // }
 
 function moveHead(delta){
-	const speed = maxSpeed * delta
+	// const speed = maxSpeed * delta
+
+	if(currentSpeed < minSpeed) {
+		currentSpeed = maxSpeed
+	}
+	const speed = currentSpeed * delta
 	const pos = body[0].pos
 	const direction = body[0].direction
 	const vectorToTarget = MyMath.getVectorFromPoints(pos, mousePosition)	
@@ -232,12 +240,13 @@ function moveHead(delta){
 
 	const turnDireciton = angleDiff > 0 ? 1 : -1
 	let newDirection = (Math.abs(angleDiff) > maxTurnAngle) ? direction + maxTurnAngle * turnDireciton : baseAngleToTarget
-	if(targetDistance < speed) return 
+	// if(targetDistance < speed) return 
 	const movementLength = speed
 	const movementVector = MyMath.rotateVector({x: movementLength, y: 0}, newDirection)
 	const newPos = MyMath.sumVector(pos, movementVector)
 	body[0].pos = newPos
 	body[0].direction = newDirection
+	currentSpeed -= friction * delta
 }
 
 function startGameLoop(frameLength){
