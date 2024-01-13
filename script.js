@@ -70,6 +70,8 @@ function gameLoop(timestamp) {
 }
 
 function update(delta){
+	const dist = MyMath.getDistanceBetweenPoints(mousePosition, body[0].pos)
+	// if(currentSpeed < minSpeed  && dist < 100) return 
 	moveHead(delta)
 	for(let i = 1; i < body.length; i++){
 		const movResult = moveTowards(body[i].pos, body[i-1].pos, body[i].direction, body[i-1].direction, maxTurnAngle * 6, body[i].length)
@@ -85,6 +87,13 @@ function render(){
 	// body[1].pos = movResult.newPosition
 	// body[1].direction = movResult.newDirection
 	
+	// function drawLeg(pos, direction, angleJoint, segmentsNumber, segmentsAngle){
+	const angle = MyMath.getVectorAngle(MyMath.getVectorFromPoints(body[1].pos, body[0].pos))
+	const jointAngle = MyMath.degToRad(70)
+	const legAngle = MyMath.degToRad(1)
+	// drawLeg(body[0].pos, angle, jointAngle, 100, baseSegmentLength, legAngle)
+	// drawLeg(body[0].pos, angle, jointAngle / 2, 6, baseSegmentLength * 5, MyMath.degToRad(15))
+	// drawLeg(body[0].pos, angle, jointAngle * 1.5, 2, baseSegmentLength * 5, MyMath.degToRad(40))
 
 	for(let i = 0; i < body.length; i++){
 		Draw.drawCircle(ctx, body[i].pos, jointRadius, creatureColor, true, 1)
@@ -132,11 +141,10 @@ function moveTowards(p1, p2, a1, a2, maxAngle, length){
 
 }
 
-
 function generateCreature() {
 	generateHead();
 	generateBody();
-	generateTail();
+	// generateTail();
 }
 
 function generateHead() {
@@ -192,41 +200,7 @@ function getRelativeCanvasPosition(canvas, event) {
 	return { x, y };
 }
 
-// function moveTowards(p1, p2, maxAngle, currentDirection, distance){
-
-// 	Draw.drawCircle(ctx, p1, 3, "white")
-// 	Draw.drawCircle(ctx, p2, 3, "cyan")
-// 	Draw.drawCircle(ctx, p2, distance, "cyan", false, 1)
-// 	Draw.drawSegmentWithAngle(ctx, p1, currentDirection, 5000, 1, "red")
-// 	const targetVector = MyMath.getVectorFromPoints(p1, p2)
-// 	let targetAngle //= MyMath.getVectorAngle(targetVector)
-// 	targetAngle =  MyMath.angleBetweenPoints(MyMath.getNormalizedVectorFromAngle(currentDirection), targetVector) + currentDirection
-
-// 	const angleDiff = currentDirection - targetAngle
-// 	if(Math.abs(angleDiff) > maxAngle) {
-// 		targetAngle = currentDirection - (maxAngle) * (angleDiff > 0 ? 1 : -1)
-// 	}
-// 	Draw.drawSegmentWithAngle(ctx, p1, targetAngle, 5000, "red")
-
-// 	Draw.drawSegmentWithAngle(ctx, p1, targetAngle, 5000, 1, "red")
-// 	const slope = Math.sin(targetAngle) / Math.cos(targetAngle)
-// 	let vector = MyMath.findClosestIntersectionSlopeCircle(slope, targetVector, distance)
-// 	if(!vector) {
-// 		frameLength = 500
-// 		// changeGameFrames(500)
-// 		let targetDistance = MyMath.getDistanceBetweenPoints(p1, p2) //- distance
-// 		if(targetDistance > distance) targetDistance = distance
-// 		vector = MyMath.multiplyVector(MyMath.getNormalizedVectorFromAngle(targetAngle),  targetDistance)
-// 	}
-// 	const newPosition = MyMath.sumVector(p1, vector)
-// 	// Draw.drawCircle(ctx, MyMath.sumVector(p1, vector), 3, "yellow")
-// 	return {newPosition, newDirection: targetAngle}
-// 	// return newPosition & new directio  
-// }
-
 function moveHead(delta){
-	// const speed = maxSpeed * delta
-
 	if(currentSpeed < minSpeed) {
 		currentSpeed = maxSpeed
 	}
@@ -271,4 +245,60 @@ function updateInfo(infos){ // [{infoName, infoValue}]
 			<td>${info}</td><td>${infos[info]}</td>
 		</tr>`
 	}
+}
+
+function drawLeg(pos, direction, angleJoint, segmentsNumber, segmentLength, segmentsAngle){
+	Draw.drawSegmentWithAngle(ctx, pos, direction, 5000, 1)
+	Draw.drawSegmentWithAngle(ctx, pos, Math.PI + direction, 5000, 1)
+	
+	
+	ctx.save()
+	ctx.beginPath()
+	ctx.translate(pos.x, pos.y)
+
+	const angle = direction - angleJoint
+
+	ctx.rotate(angle)
+	ctx.moveTo(0, 0)
+	ctx.lineTo(segmentLength, 0)
+	ctx.arc(segmentLength, 0, jointRadius, 0, Math.PI * 2)
+
+
+
+	for(let i = 0; i < segmentsNumber-1; i++){
+		ctx.translate(segmentLength, 0)	
+		ctx.rotate(-segmentsAngle)
+		ctx.moveTo(0, 0)
+		ctx.lineTo(segmentLength, 0)
+		ctx.arc(segmentLength, 0, jointRadius, 0, Math.PI * 2)	
+	}
+	ctx.restore()
+	ctx.save()
+	ctx.translate(pos.x, pos.y)
+
+
+	// ctx.rotate( direction + angleJoint)
+	// ctx.moveTo(0, 0)
+	// ctx.lineTo(segmentLength, 0)
+	// ctx.arc(segmentLength, 0, 5, 0, Math.PI * 2)
+
+	ctx.rotate(direction + angleJoint)
+	ctx.moveTo(0, 0)
+	ctx.lineTo(segmentLength, 0)
+	ctx.arc(segmentLength, 0, jointRadius, 0, Math.PI * 2)
+
+	for(let i = 0; i < segmentsNumber-1; i++){
+		ctx.translate(segmentLength, 0)	
+		ctx.rotate(+segmentsAngle)
+		ctx.moveTo(0, 0)
+		ctx.lineTo(segmentLength, 0)
+		ctx.arc(segmentLength, 0, jointRadius, 0, Math.PI * 2)
+	}
+
+	ctx.strokeStyle = "white"
+	ctx.fillStyle = "white"
+	ctx.stroke()
+	ctx.fill()
+	ctx.closePath()
+	ctx.restore()
 }
