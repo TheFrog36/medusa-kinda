@@ -23,7 +23,7 @@ export function multiplyVector(v, length){
 
 export function angleBetweenPoints(p1, p2){
     
-    return Math.atan2(p2.y - p1.y, p2.x, p1.x);
+    return Math.atan2(p2.y - p1.y, p2.x - p1.x);
 }
 
 export function degToRad(degrees){
@@ -90,5 +90,6 @@ export function getVectorAngleDifference(angle1, angle2) {
     angle2 = angle2 % twoPi;
     let diff = angle1 - angle2;
     diff = (diff + twoPi + Math.PI) % twoPi - Math.PI;
+    if(isNaN(diff)) console.log("nan", angle1, angle2)
     return diff;
 }

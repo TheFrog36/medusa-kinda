@@ -3,3 +3,14 @@ const segmentEndAngle = 160
 
 during charge, segmentAngle should increase, capped at segmentEndAngle
 during release segmentAngle shoud decrease capped at min
+
+Now, do it based on speed 
+
+Movement based on push & release
+
+generate leg points as array
+
+
+{
+
+}
